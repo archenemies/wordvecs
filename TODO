@@ -1,0 +1,16 @@
+FHE 27 Apr 2025
+
+\- offsets should count from beginning of file
+\- print long integers
+
+\- fix and test filter-wordlist.c and extract-word-vectors.c
+  /- filter -> intersect
+  \-> use join instead
+  \- create test list
+  - make a script to automate the join invocation?
+
+- how did we generate wk-all-words.tab?
+  \- need to back up the backups so that we have this
+  - look in amenhotep-backup
+
+- extract-word-vectors: create a matrix for a list of word vectors

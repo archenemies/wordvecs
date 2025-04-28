@@ -1,0 +1,11 @@
+*~
+*.log
+*.aux
+*.out
+TAGS
+*.tiff
+*.png
+*.bbl
+*.toc
+*.blg
+

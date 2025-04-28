@@ -1,0 +1,30 @@
+# FHE 27 Apr 2025
+# commands to generate .out and .tab files
+
+gunzip < ~/rt/data/GoogleNews-vectors-negative300.bin.gz | ./list-word2vec-bin > gn300-list.out
+
+head gn300-list.out -n 300 > gn300-list-short.out
+# LC_ALL=C sort gn300-list-short.out -k 3 -t ' ' > gn300-list-short.sorted.out
+LC_ALL=C sort gn300-list.out -k 3 -t ' ' > gn300-list.sorted.out
+
+# where did we get wk-all-words.tab?
+grep -P '^en\t' ~/rt/data/wk-all-words.tab | cut -f 2 -d $'\t' > wk-en-words.tab
+cat wk-en-words.tab | tr ' ' '_' | LC_ALL=C sort > wk-en-words.under.tab
+
+# check no duplicates
+cat wk-en-words.under.tab | uniq -cd
+
+# LC_ALL=C join -1 3 -2 1 gn300-list-short.sorted.out wk-en-words.under.tab -o '1.1 1.2 1.3' | sort -k 1 -n
+
+LC_ALL=C join -1 3 -2 1 gn300-list.sorted.out wk-en-words.under.tab -o '1.1 1.2 1.3' | sort -k 1 -n > gn300-wk-en-list.tab
+
+$ wc -l gn300-wk-en-list.tab
+159304 gn300-wk-en-list.tab
+
+$ du -sh gn300-wk-en-list.tab
+4.1M    gn300-wk-en-list.tab
+
+# extracted vectors will consume 182 MB
+You have: 159304*4*300 bytes / MB
+You want: 
+        Definition: 182.30896
