@@ -6,7 +6,7 @@
 
 #define MAX_WORD_LEN 100
 
-int total_read = 0;
+long int total_read = 0;
 
 int my_getchar() {
   total_read++;
@@ -21,20 +21,23 @@ int my_fread(int length, void *dummy) {
 int main() {
   long vocab_size, vector_size;
   char word[MAX_WORD_LEN];
-  int c, i;
+  int c;
+  long int i;
+  int scan_count;
 
   // Read vocab size and vector size from first line
-  if (scanf("%ld %ld\n", &vocab_size, &vector_size) != 2) {
+  if (scanf("%ld %ld\n%n", &vocab_size, &vector_size, &scan_count) != 2) {
     fprintf(stderr, "Failed to read header\n");
     return 1;
   }
+  total_read += scan_count;
 
   fprintf(stderr, "Reading %d word vectors of size %d\n",
     vocab_size, vector_size);
 
   // Process each word entry
   /* for (long j = 0; j < vocab_size; j++) { */
-  int j=0;
+  long int j=0;
   while(!feof(stdin)) {
     // Read word until space
     i = 0;
@@ -46,7 +49,7 @@ int main() {
     word[i] = '\0';
         
     // Print the word
-    printf("%d %d: %s\n", j, total_read, word);
+    printf("%ld %ld %s\n", j, total_read, word);
 
     if(1) {
       // This works
