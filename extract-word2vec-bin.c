@@ -1,8 +1,14 @@
 // -*- c-basic-offset: 2; my-source-command: "make extract-word2vec-bin" -*-
 // FHE 28 Apr 2025
-// New version of list-word2vec-bin.c
-// With help from Grok
+// List and extract words and vectors from word2vec binary file.
+// New version of list-word2vec-bin.c. With help from Grok.
 // https://grok.com/chat/0f989c40-9a23-423a-813a-b61c872f8b2f
+
+// Usage:
+// List words in a word2vec binary (produces offset table):
+// extract-word2vec-bin -l < BINARY_FILE
+// Extract word vectors from a word2vec binary (accepts filtered offset table, must be sorted by offset):
+// extract-word2vec-bin OFFSET_TABLE OUTPUT_PREFIX < BINARY_FILE
 
 #include <stdio.h>
 #include <stdlib.h>

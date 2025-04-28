@@ -13,4 +13,4 @@ FHE 27 Apr 2025
   \- need to back up the backups so that we have this
   - look in amenhotep-backup
 
-- extract-word-vectors: create a matrix for a list of word vectors
+\- extract-word-vectors: create a matrix for a list of word vectors
