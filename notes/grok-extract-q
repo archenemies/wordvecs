@@ -1,0 +1,110 @@
+I'm back. Thank you for your help earlier.
+
+I now have an ASCII table with a list of words and offsets into a wordvector binary file. The binary file is in the same format we've been using, let's call it the word2vec binary format. The offsets in my table give the byte offset of the start of the word in the binary file. (To find the start of the vector data, add the word length + 1 to the offset). The columns of the table are word index, byte offset, and word. The table is already sorted by the first field (and the second, since it is monotonic in the first). Here are the first few lines of the table:
+
+1 1220 in
+2 2424 for
+3 3629 that
+4 4832 is
+5 6035 on
+8 9647 with
+9 10852 said
+
+You already gave me a program extract_word_vectors.c which parses this table and extracts the word vectors from the word2vec binary format. I want you to make a few changes.
+
+- The offset table format above no longer has colon ":".
+- We should check that the word in the table is the same as the word in the binary file, and exit if there is a mismatch.
+- I want to output just the word vectors to one file, and to another file an ASCII table where each line contains the line number and the word.
+- An additional file should be output which specifies the length of the vector and the number of words.
+- The output files should have the same basename and different extensions. The basename should be specified on the command line. The extensions should be ".wvs" (for the binary word vector data), ".tab" (for the numbered list of words), and ".hdr" (for the dimension and word count).
+- As before, seeking should be used where possible. I am fine with the way you did that using ftell().
+- This is the default usage:
+
+  < BINARY_FILE extract_wordvecs OFFSET_TABLE OUTPUT_PREFIX
+
+- I am appending my version of list-word2vec-bin.c so that you can see how I changed it. Note the "%n" in scanf which is a GNU extension that reports how many characters have been used.
+
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include <errno.h>
+
+    #define MAX_WORD_LEN 100
+
+    long int total_read = 0;
+    long int can_seek = 1;
+    long int j=0;
+
+    int my_getchar() {
+      total_read++;
+      return getchar();
+    }
+    int my_fread(int length, void *dummy) {
+      total_read += length;
+      return fread(dummy, length, 1, stdin);
+    }
+    #define MAX_READ 1024*4
+    char dummy_buffer[MAX_READ];
+
+    int my_fseek(int length) {
+      if(can_seek) {
+        total_read += length;
+        return fseek(stdin, length, SEEK_CUR);
+      } else {
+        /* fprintf(stderr, "simulating seek of length %d\n", length); */
+        while(length>MAX_READ) {
+          int res = my_fread(MAX_READ, dummy_buffer);
+          if(res==-1) return res;
+          length -= MAX_READ;
+        }
+        return my_fread(length, dummy_buffer);
+      }
+    }
+
+    int main() {
+      long vocab_size, vector_size;
+      char word[MAX_WORD_LEN];
+      int c;
+      long int i;
+      int scan_count;
+
+      if (ftell(stdin) == -1) {
+        fprintf(stderr, "Warning: STDIN may not be seekable: %s\n",
+          strerror(errno));
+        can_seek = 0;
+      }
+      // Read vocab size and vector size from first line
+      if (scanf("%ld %ld\n%n", &vocab_size, &vector_size, &scan_count) != 2) {
+        fprintf(stderr, "Failed to read header\n");
+        return 1;
+      }
+      total_read += scan_count;
+
+      fprintf(stderr, "Reading %d word vectors of size %d\n",
+        vocab_size, vector_size);
+
+      // Process each word entry
+      /* for (long j = 0; j < vocab_size; j++) { */
+      while(!feof(stdin)) {
+        // Read word until space
+        long int word_start = total_read;
+        i = 0;
+        while ((c = my_getchar()) != ' ' && c != EOF) {
+          if (i < MAX_WORD_LEN - 1) {
+            word[i++] = c;
+          }
+        }
+        word[i] = '\0';
+
+        // Print the word
+        printf("%ld %ld %s\n", j, word_start, word);
+
+        my_fseek(sizeof(float)*vector_size);
+
+        j++;
+      }
+
+      return 0;
+    }
+
+- If you wish, you could combine the two programs into one, so that we can avoid duplicating some of the helper functions. Then I would imagine the "extract" functionality would be activated by a command line option like "-x".
