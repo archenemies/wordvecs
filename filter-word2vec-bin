@@ -9,6 +9,7 @@
 
 # usage:
 # KEEP=1 MAX_WORDS=300 filter-word2vec-bin BINARY_FILE WORDS_TABLE OUTPUT_PREFIX
+# also e.g. MAX_DIMS=10 crops extracted vectors
 
 # NB: ignore the warning about illegal seek
 

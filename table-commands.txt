@@ -41,4 +41,4 @@ most of the above now done by this:
 
 ./filter-word2vec-bin ../data/GoogleNews-vectors-negative300.bin.gz wk-en-words.under.tab gn300-wk-en
 
-MAX_WORDS=400 ./filter-word2vec-bin ../data/GoogleNews-vectors-negative300.bin.gz wk-en-words.under.tab gn300-wk-short
+MAX_WORDS=400 MAX_DIMS=10 ./filter-word2vec-bin ../data/GoogleNews-vectors-negative300.bin.gz wk-en-words.under.tab gn300-wk-short
