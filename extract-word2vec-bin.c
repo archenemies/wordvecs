@@ -20,7 +20,7 @@
 long int total_read = 0;
 long int can_seek = 1;
 long int word_num=0;
-long vocab_size, vector_size;
+long vocab_size, vector_size, out_vector_size;
 
 int my_getchar() {
   total_read++;
@@ -177,13 +177,13 @@ int do_extract(char *offset_table, char *output_prefix) {
     }
 
     // Output the vector and table entry
-    fwrite(vector, sizeof(float), vector_size, wvs_file);
+    fwrite(vector, sizeof(float), out_vector_size, wvs_file);
     fprintf(tab_file, "%ld %ld %s\n", word_count, index, table_word);
     word_count++;
   }
 
   // Output the header
-  fprintf(hdr_file, "%ld %ld\n", vector_size, word_count);
+  fprintf(hdr_file, "%ld %ld\n", out_vector_size, word_count);
 
   // Cleanup
   free(vector);
@@ -231,9 +231,24 @@ int main(int argc, char **argv) {
 
   if(list_mode) {
     return do_list();
-  } else {
-    char *offset_table = argv[1];
-    char *output_prefix = argv[2];
-    return do_extract(offset_table, output_prefix);
   }
+
+  // Set out_vector_size from MAX_DIMS or default to vector_size
+  char *max_dims = getenv("MAX_DIMS");
+  if (max_dims && strlen(max_dims) > 0) {
+    long d = atol(max_dims);
+    if (d > 0 && d <= vector_size) {
+      out_vector_size = d;
+    } else {
+      fprintf(stderr, "Invalid MAX_DIMS '%s' (vector_size=%ld)\n", max_dims, vector_size);
+      exit(1);
+    }
+  } else {
+    out_vector_size = vector_size;
+  }
+  fprintf(stderr, "Writing vectors of size %ld\n", out_vector_size);
+
+  char *offset_table = argv[1];
+  char *output_prefix = argv[2];
+  return do_extract(offset_table, output_prefix);
 }
