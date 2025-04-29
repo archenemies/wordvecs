@@ -2,7 +2,7 @@
 # commands to generate .out and .tab files
 
 # gunzip < ~/rt/data/GoogleNews-vectors-negative300.bin.gz | ./list-word2vec-bin > gn300-list.out
-gunzip < ~/rt/data/GoogleNews-vectors-negative300.bin.gz | ./extract-word2vec-bin -l > gn300-list-1.out
+gunzip < ~/rt/data/GoogleNews-vectors-negative300.bin.gz | ./extract-word2vec-bin -l > gn300-list.out
 
 head gn300-list.out -n 300 > gn300-list-short.out
 # LC_ALL=C sort gn300-list-short.out -k 3 -t ' ' > gn300-list-short.sorted.out
@@ -34,3 +34,11 @@ gunzip < ~/rt/data/GoogleNews-vectors-negative300.bin.gz | ./extract-word2vec-bi
 
 $ du -sh gn300-wk.wvs
 183M    gn300-wk.wvs
+
+----------------------------------------------------------------
+FHE 28 Apr 2025
+most of the above now done by this:
+
+./filter-word2vec-bin ../data/GoogleNews-vectors-negative300.bin.gz wk-en-words.under.tab gn300-wk-en
+
+MAX_WORDS=400 ./filter-word2vec-bin ../data/GoogleNews-vectors-negative300.bin.gz wk-en-words.under.tab gn300-wk-short

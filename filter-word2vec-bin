@@ -1,0 +1,62 @@
+#!/bin/zsh
+# FHE 28 Apr 2025
+# script to filter a binary word2vec file given a list of words
+# calls extract-word2vec-bin, and sort and join
+
+# inputs: binary file, word list, output prefix, max words
+# outputs: .wvs, .tab, .hdr files
+# intermediate files: offset file, sorted by word, filtered with join, resorted by index
+
+# usage:
+# KEEP=1 MAX_WORDS=300 filter-word2vec-bin BINARY_FILE WORDS_TABLE OUTPUT_PREFIX
+
+# NB: ignore the warning about illegal seek
+
+me=${0##*/}
+die () { >&2 echo "$me: $@"; exit 1 }
+warn () { >&2 echo "$me: $@"; }
+
+[[ $#argv -eq 3 ]] || die "Expected 3 arguments"
+
+binary_file=$argv[1]
+word_table=$argv[2]
+output_prefix=$argv[3]
+
+if [[ $MAX_WORDS -eq 0 ]]; then
+  head_cmd=(cat)
+else
+  head_cmd=(head -n "$MAX_WORDS")
+fi
+
+if [[ $binary_file = *.gz ]]; then
+  cat_binary () {
+    gunzip < $binary_file
+  }
+else
+  cat_binary () {
+    cat < $binary_file
+  }
+fi
+
+_offset_fn=$output_prefix.offs.out
+_byword_fn=$output_prefix.offs-byword.out
+_join_fn=$output_prefix.offs-join.out
+_index_fn=$output_prefix.offs-filter.out
+
+set -x -e
+
+cat_binary | ./extract-word2vec-bin -l | $head_cmd > $_offset_fn
+LC_ALL=C sort $_offset_fn -k 3 -t ' ' > $_byword_fn
+
+res=$(cat $word_table | uniq -cd)
+[[ $res == '' ]] || { die "Duplicates found in $word_table" }
+
+LC_ALL=C join -1 3 -2 1 $_byword_fn $word_table -o '1.1 1.2 1.3' > $_join_fn
+< $_join_fn sort -k 1 -n > $_index_fn
+
+cat_binary | ./extract-word2vec-bin $_index_fn $output_prefix
+
+if [[ $KEEP -eq 0 ]]; then
+  # remove offset files
+  rm -f $output_prefix.offs*.out
+fi

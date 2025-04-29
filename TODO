@@ -1,3 +1,8 @@
+FHE 28 Apr 2025
+
+\- resurrect short version for testing
+  \- shell script for table generation (filter-word2vec-bin)
+
 FHE 27 Apr 2025
 
 \- offsets should count from beginning of file
